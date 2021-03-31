@@ -10,13 +10,23 @@ const io = require('socket.io')(server, {
 
 const port = process.env.PORT || 8000;
 
+const connectedClients = new Set();
+
 app.get('/', (req, res) => {
-  res.send('Hello from Express');
+  res.send('Home');
 });
 
 io.on('connection', socket => {
-  console.log('a user connected');
+  console.log(`user ${socket.id} connected`);
+  connectedClients.add(socket.id);
+  console.log(`${connectedClients.size} clients connected`)
   socket.emit('connection', null)
+
+  socket.on('disconnect', () => {
+    console.log(`user ${socket.id} disconnected`);
+    connectedClients.delete(socket.id);
+    console.log(`${connectedClients.size} clients connected`)
+  })
 })
 
 server.listen(port, () => {
